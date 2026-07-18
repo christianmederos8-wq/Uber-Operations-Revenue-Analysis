@@ -67,14 +67,9 @@ The database contains information about:
 - Payments
 - Reviews
 
-### Database Schema
+## Database Schema
 
-> *(Entity Relationship Diagram will be added here.)*
-
-<p align="center">
-<img src="images/erd.png" width="850">
-</p>
-
+![Entity Relationship Diagram](images/erd.png)
 ---
 
 # 🛠 Tools & Technologies
