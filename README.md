@@ -1,4 +1,4 @@
-# 🚖 Uber Operations & Revenue Analysis
+## 🚖 Uber Operations & Revenue Analysis
 
 <p align="center">
   <img src="images/dashboard.png" alt="Uber Dashboard" width="900">
@@ -19,9 +19,9 @@
 
 This project analyzes operational and financial data from a ride-hailing platform similar to **Uber**.
 
-The objective is to transform raw transactional data into actionable business insights by applying SQL for data analysis and Power BI for interactive visualization.
+The objective is to transform raw transactional data into meaningful business insights using SQL for data analysis and Power BI for visualization.
 
-The project follows an end-to-end analytics workflow, from data quality assessment and exploratory data analysis (EDA) to KPI development, business analysis, dashboard creation, and strategic recommendations.
+The project follows a complete analytics workflow that includes data quality assessment, exploratory data analysis (EDA), KPI development, business performance evaluation, dashboard creation, and strategic recommendations.
 
 ---
 
@@ -44,15 +44,12 @@ This project simulates the work of a Data Analyst supporting business decision-m
 
 # 🎯 Objectives
 
-- Assess data quality before analysis.
+- Assess data quality.
 - Perform Exploratory Data Analysis (EDA).
-- Calculate key business KPIs.
-- Analyze operational performance.
-- Evaluate financial performance.
-- Analyze driver performance.
-- Analyze rider behavior.
-- Build an executive Power BI dashboard.
-- Generate business recommendations supported by data.
+- Develop business KPIs.
+- Answer key business questions using SQL.
+- Build an interactive Power BI dashboard.
+- Generate actionable business recommendations.
 
 ---
 
@@ -70,6 +67,7 @@ The database contains information about:
 ## Database Schema
 
 ![Entity Relationship Diagram](images/erd.png)
+
 ---
 
 # 🛠 Tools & Technologies
@@ -113,6 +111,46 @@ Business Recommendations
 
 ---
 
+# 📈 Current Progress
+
+### ✅ Completed
+
+- Data Quality Assessment
+- Exploratory Data Analysis (EDA)
+- Financial Performance KPIs
+
+### 🚧 Currently in Progress
+
+- Driver Performance Analysis
+
+### ⏳ Upcoming
+
+- Operational Performance
+- Cancellation Analysis
+- Rider Behavior
+- Service Quality
+- Power BI Dashboard
+- Business Recommendations
+
+---
+
+# 📌 Business Questions
+
+The complete list of business questions analyzed throughout this project is available in:
+
+📄 **docs/business_questions.md**
+
+The analysis covers:
+
+- Financial Performance
+- Driver Performance
+- Operational Performance
+- Cancellation Analysis
+- Rider Behavior
+- Service Quality
+
+---
+
 # 📂 Repository Structure
 
 ```text
@@ -127,11 +165,7 @@ Uber-Operations-Revenue-Analysis/
 ├── sql/
 │   ├── 01_data_quality.sql
 │   ├── 02_eda.sql
-│   ├── 03_kpis.sql
-│   ├── 04_operational_analysis.sql
-│   ├── 05_financial_analysis.sql
-│   ├── 06_driver_analysis.sql
-│   └── 07_rider_analysis.sql
+│   └── 03_kpis.sql
 │
 ├── powerbi/
 │   └── Uber_Dashboard.pbix
@@ -142,6 +176,7 @@ Uber-Operations-Revenue-Analysis/
 │   └── charts/
 │
 ├── docs/
+│   ├── business_questions.md
 │   ├── data_dictionary.pdf
 │   └── executive_report.pdf
 │
@@ -154,13 +189,9 @@ Uber-Operations-Revenue-Analysis/
 
 | Phase | Status |
 |---------|:------:|
-| Data Quality Assessment | ⬜ |
-| Exploratory Data Analysis | ⬜ |
-| KPI Development | ⬜ |
-| Operational Analysis | ⬜ |
-| Financial Analysis | ⬜ |
-| Driver Analysis | ⬜ |
-| Rider Analysis | ⬜ |
+| Data Quality Assessment | ✅ |
+| Exploratory Data Analysis | ✅ |
+| KPI Development | 🟡 In Progress |
 | Dashboard Development | ⬜ |
 | Business Recommendations | ⬜ |
 
@@ -168,7 +199,7 @@ Uber-Operations-Revenue-Analysis/
 
 # 📈 Dashboard Preview
 
-> *(Dashboard screenshots will be added after the Power BI development.)*
+> *(Dashboard screenshots will be added after Power BI development.)*
 
 <p align="center">
 <img src="images/dashboard.png" width="900">
@@ -176,30 +207,21 @@ Uber-Operations-Revenue-Analysis/
 
 ---
 
-# 💡 Key Insights
+# 💡 Preliminary Findings
 
-The main findings will be documented here after completing the analysis.
+Current analysis indicates:
 
-Examples:
-
-- Peak demand periods.
-- Revenue distribution.
-- Top-performing drivers.
-- Rider behavior patterns.
-- Cancellation trends.
-- Revenue by city.
+- Houston generates the highest total revenue.
+- Los Angeles records the highest average fare.
+- Airport pickup zones generate a significant share of total revenue.
+- Flushing is the busiest pickup zone.
+- Payment methods are distributed almost evenly across the platform.
 
 ---
 
 # 📌 Business Recommendations
 
-Based on the analysis, this section will provide actionable recommendations focused on:
-
-- Revenue optimization.
-- Operational efficiency.
-- Driver performance.
-- Customer experience.
-- Demand management.
+Business recommendations will be added after completing the dashboard and the full KPI analysis.
 
 ---
 
@@ -221,6 +243,19 @@ Industrial Engineer | Data Analyst
 
 📍 Santa Catarina, Brazil
 
+### Skills Demonstrated
+
+- SQL
+- Data Cleaning
+- Exploratory Data Analysis (EDA)
+- Business Intelligence
+- KPI Development
+- Window Functions
+- Common Table Expressions (CTEs)
+- Data Visualization
+- Power BI
+- Excel
+
 GitHub: *(Coming Soon)*
 
 LinkedIn: *(Coming Soon)*
@@ -228,6 +263,20 @@ LinkedIn: *(Coming Soon)*
 ---
 
 # ⭐ Project Status
+
+🚧 **In Progress**
+
+**Current completion:** ~45%
+
+### Completed
+
+- ✅ Data Quality Assessment
+- ✅ Exploratory Data Analysis
+- ✅ Financial Performance KPIs
+
+### Next Milestone
+
+- Driver Performance Analysis
 
 🚧 **In Progress**
 
