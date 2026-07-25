@@ -1152,3 +1152,341 @@ Observation:
   traffic congestion, pricing anomalies, or potential data quality issues
   requiring further investigation.
 */
+/*
+===============================================================================
+4. CANCELLATION ANALYSIS
+===============================================================================
+
+Objective:
+Identify the factors associated with trip cancellations and estimate their
+business impact.
+===============================================================================
+C1. OVERALL CANCELLATION RATE
+===============================================================================
+
+Question:
+What is the overall cancellation rate?
+
+Business Purpose:
+Measure the percentage of trips that end in cancellation to evaluate
+operational efficiency and customer experience.
+===============================================================================
+*/
+
+SELECT
+    COUNT(CASE WHEN status = 'cancelled' THEN trip_id END) AS cancelled_trips,
+    COUNT(trip_id) AS total_trips,
+    ROUND(
+        COUNT(CASE WHEN status = 'cancelled' THEN trip_id END)
+        * 100.0 /
+        COUNT(trip_id),
+        2
+    ) AS cancellation_rate
+FROM trips;
+
+/*
+Observation:
+
+- Out of 20,000 recorded trips, 2,966 were cancelled, resulting in an
+  overall cancellation rate of 14.83%.
+- Approximately one out of every seven trip requests did not reach
+  completion, representing a significant operational challenge.
+- Monitoring the cancellation rate is essential for evaluating service
+  reliability, customer experience, and operational efficiency.
+- Further analysis should identify who initiates cancellations, where they
+  occur most frequently, and the potential financial impact on the platform.
+*/
+/*
+===============================================================================
+C2. WHO CANCELS MORE TRIPS: DRIVERS OR RIDERS?
+===============================================================================
+
+Question:
+Who cancels more trips: drivers or riders?
+
+Business Purpose:
+Determine whether drivers or riders are responsible for the majority of trip
+cancellations to support targeted operational improvements.
+===============================================================================
+*/
+
+SELECT
+    cancelled_by,
+    COUNT(cancel_id) AS cancelled_trips,
+    ROUND(
+        COUNT(cancel_id) * 100.0 /
+        (SELECT COUNT(*) FROM cancellations),
+        2
+    ) AS percentage
+FROM cancellations
+GROUP BY
+    cancelled_by
+ORDER BY
+    cancelled_trips DESC;
+
+/*
+Observation:
+
+- Riders account for the majority of trip cancellations, representing
+  69.76% of all cancelled trips (2,069 cancellations).
+- Drivers are responsible for the remaining 30.24% (897 cancellations).
+- The results suggest that rider behavior has a greater impact on the
+  platform's overall cancellation rate than driver behavior.
+- Understanding the reasons behind rider cancellations may help improve
+  customer experience, reduce lost trips, and increase platform efficiency.
+*/
+/*
+===============================================================================
+C3. CITIES WITH THE HIGHEST CANCELLATION RATE
+===============================================================================
+
+Question:
+Which cities have the highest cancellation rate?
+
+Business Purpose:
+Identify the cities with the highest proportion of cancelled trips to support
+operational improvements and reduce service disruptions.
+===============================================================================
+*/
+
+SELECT
+    l.city,
+    COUNT(CASE WHEN t.status = 'cancelled' THEN t.trip_id END) AS cancelled_trips,
+    COUNT(t.trip_id) AS total_trips,
+    ROUND(
+        COUNT(CASE WHEN t.status = 'cancelled' THEN t.trip_id END)
+        * 100.0 /
+        COUNT(t.trip_id),
+        2
+    ) AS cancellation_rate
+FROM trips AS t
+JOIN locations AS l
+    ON t.pickup_location_id = l.location_id
+GROUP BY
+    l.city
+ORDER BY
+    cancellation_rate DESC;
+
+/*
+Observation:
+
+- Houston has the highest cancellation rate at 15.58%, followed closely by
+  Los Angeles at 15.41%.
+- New York (14.26%) and Chicago (14.15%) record slightly lower cancellation
+  rates.
+- The cancellation rates across all four cities are relatively similar,
+  differing by only 1.43 percentage points.
+- This suggests that trip cancellations are a platform-wide operational
+  challenge rather than an issue concentrated in a single city.
+*/
+/*
+===============================================================================
+C4. RELATIONSHIP BETWEEN SURGE PRICING AND CANCELLATIONS
+===============================================================================
+
+Question:
+Is there a relationship between surge pricing and cancellations?
+
+Business Purpose:
+Evaluate whether higher surge pricing is associated with increased trip
+cancellations to support pricing and demand management strategies.
+===============================================================================
+*/
+
+SELECT
+    CASE
+        WHEN surge_multiplier = 1 THEN 'No Surge'
+        WHEN surge_multiplier < 2 THEN 'Low Surge'
+        ELSE 'High Surge'
+    END AS surge_level,
+    COUNT(CASE WHEN status = 'cancelled' THEN trip_id END) AS cancelled_trips,
+    COUNT(*) AS total_trips,
+    ROUND(
+        COUNT(CASE WHEN status = 'cancelled' THEN trip_id END) * 100.0 /
+        COUNT(*),
+        2
+    ) AS cancellation_rate
+FROM trips
+GROUP BY
+    surge_level
+ORDER BY
+    cancellation_rate DESC;
+
+/*
+Observation:
+
+- Trips with high surge pricing show the highest cancellation rate at
+  16.09%.
+- Low surge trips have a cancellation rate of 14.81%, while trips with no
+  surge pricing have the lowest rate at 14.61%.
+- The results suggest a modest positive relationship between surge pricing
+  and trip cancellations.
+- Although higher surge pricing appears to increase the likelihood of
+  cancellations, the relatively small difference indicates that additional
+  operational or customer-related factors are also influencing cancellation
+  behavior.
+*/
+/*
+===============================================================================
+C5. POTENTIAL REVENUE LOST DUE TO CANCELLED TRIPS
+===============================================================================
+
+Question:
+How much potential revenue is lost due to cancelled trips?
+
+Business Purpose:
+Estimate the revenue that could have been generated if cancelled trips had
+been successfully completed.
+===============================================================================
+*/
+
+SELECT
+    COUNT(trip_id) AS cancelled_trips,
+    ROUND(SUM(total_fare), 2) AS potential_revenue_lost,
+    ROUND(AVG(total_fare), 2) AS average_lost_revenue_per_trip
+FROM trips
+WHERE status = 'cancelled';
+
+/*
+Observation:
+
+- Cancelled trips represent an estimated potential revenue loss of
+  $108,201.55 across 2,966 cancelled trips.
+- On average, each cancelled trip represents a potential revenue loss of
+  $36.48.
+- Reducing the cancellation rate could generate a meaningful increase in
+  platform revenue while improving customer satisfaction and driver
+  utilization.
+- These findings highlight the financial impact of cancellations and support
+  initiatives focused on minimizing avoidable trip cancellations.
+*/
+===============================================================================
+5. RIDER BEHAVIOR
+===============================================================================
+
+Objective:
+Analyze rider activity, spending behavior, and engagement across the platform
+to better understand customer usage patterns and support business decisions.
+ /*
+===============================================================================
+R1. RIDERS GENERATING THE HIGHEST REVENUE
+===============================================================================
+
+Question:
+Which riders generate the highest revenue?
+
+Business Purpose:
+Identify the riders who contribute the most revenue to the platform to better
+understand customer value and support retention strategies.
+===============================================================================
+*/
+
+SELECT
+    rider_id,
+    ROUND(SUM(total_fare), 2) AS total_revenue
+FROM trips
+WHERE status = 'completed'
+GROUP BY
+    rider_id
+ORDER BY
+    total_revenue DESC;
+
+/*
+Observation:
+
+- Rider 739 generated the highest revenue on the platform, contributing
+  $3,485.26 in completed trips.
+- The top 10 riders each generated more than $3,100 in total revenue,
+  demonstrating that a relatively small group of customers contributes
+  significantly to platform revenue.
+- Identifying high-value riders can support customer retention programs,
+  personalized promotions, and loyalty initiatives.
+*/
+/*
+===============================================================================
+R2. CITIES WITH THE MOST ACTIVE RIDERS
+===============================================================================
+
+Question:
+Which cities have the most active riders?
+
+Business Purpose:
+Identify the cities with the largest number of active riders to understand
+customer concentration and support market expansion strategies.
+===============================================================================
+*/
+
+SELECT
+    l.city,
+    COUNT(DISTINCT t.rider_id) AS active_riders
+FROM trips AS t
+JOIN locations AS l
+    ON t.pickup_location_id = l.location_id
+WHERE t.status = 'completed'
+GROUP BY
+    l.city
+ORDER BY
+    active_riders DESC;
+
+/*
+Observation:
+
+- New York has the largest active rider base with 1,002 unique riders,
+  followed closely by Houston with 992.
+- Chicago and Los Angeles recorded 936 and 884 active riders, respectively.
+- The relatively small differences between cities suggest that rider activity
+  is well distributed across the platform rather than concentrated in a
+  single market.
+- Understanding rider distribution can support market expansion, resource
+  allocation, and customer engagement strategies.
+*/
+
+===============================================================================
+6. SERVICE QUALITY
+===============================================================================
+
+Objective:
+Evaluate service quality through driver and rider ratings to identify
+performance trends and opportunities for improving customer satisfaction.
+ /*
+===============================================================================
+S1. RELATIONSHIP BETWEEN DRIVER RATINGS AND REVENUE
+===============================================================================
+
+Question:
+Is there a relationship between driver ratings and revenue?
+
+Business Purpose:
+Evaluate whether higher-rated drivers tend to generate more revenue and
+identify the relationship between service quality and financial performance.
+===============================================================================
+*/
+
+SELECT
+    d.driver_id,
+    d.rating,
+    ROUND(SUM(t.total_fare), 2) AS total_revenue
+FROM drivers AS d
+JOIN trips AS t
+    ON d.driver_id = t.driver_id
+WHERE t.status = 'completed'
+GROUP BY
+    d.driver_id,
+    d.rating
+ORDER BY
+    total_revenue DESC;
+
+/*
+Observation:
+
+- Drivers with higher customer ratings frequently appear among the highest
+  revenue generators, suggesting a positive relationship between service
+  quality and financial performance.
+- However, the results also show that some drivers with relatively lower
+  ratings generate substantial revenue, indicating that ratings alone do not
+  determine revenue.
+- Additional factors such as trip volume, travel distance, working hours,
+  and demand patterns also contribute significantly to driver revenue.
+- A scatter plot comparing driver ratings and total revenue provides a more
+  appropriate visualization for evaluating the strength of this relationship.
+*/
