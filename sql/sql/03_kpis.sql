@@ -394,3 +394,761 @@ Observation:
 - This balanced distribution suggests that customers are comfortable using
   multiple payment options, reducing dependency on a single payment method.
 */
+/*
+===============================================================================
+2. DRIVER PERFORMANCE
+===============================================================================
+
+Objective:
+Evaluate driver productivity, performance, and contribution to company
+revenue.
+===============================================================================
+*/
+/*
+===============================================================================
+D1. DRIVER WITH THE HIGHEST REVENUE
+===============================================================================
+
+Question:
+Which driver has generated the highest revenue?
+
+Business Purpose:
+Identify the driver who has generated the highest total revenue to evaluate
+individual performance and recognize top revenue contributors.
+===============================================================================
+*/
+
+SELECT
+    d.driver_id,
+    ROUND(SUM(t.total_fare), 2) AS total_revenue
+FROM drivers AS d
+JOIN trips AS t
+    ON d.driver_id = t.driver_id
+GROUP BY d.driver_id
+ORDER BY total_revenue DESC
+LIMIT 1;
+
+/*
+Observation:
+
+- Driver 234 generated the highest total revenue, reaching 4,265.13
+  monetary units.
+- This driver represents the top individual contributor to the platform's
+  total revenue.
+- Identifying the highest-performing drivers can support incentive programs,
+  performance benchmarking, and operational decision-making.
+*/
+/*
+===============================================================================
+D2. DRIVER WITH THE MOST COMPLETED TRIPS
+===============================================================================
+
+Question:
+Which driver has completed the most trips?
+
+Business Purpose:
+Identify the most productive driver based on completed trip volume and
+support performance evaluation and driver incentive decisions.
+===============================================================================
+*/
+
+SELECT
+    d.driver_id,
+    COUNT(t.trip_id) AS completed_trips
+FROM drivers AS d
+JOIN trips AS t
+    ON d.driver_id = t.driver_id
+WHERE t.status = 'completed'
+GROUP BY d.driver_id
+ORDER BY completed_trips DESC
+LIMIT 1;
+
+/*
+Observation:
+
+- Driver 208 completed the highest number of trips, with a total of
+  80 completed trips.
+- This result identifies Driver 208 as the most productive driver based
+  on completed trip volume.
+- High trip volume may reflect strong availability, efficient trip
+  completion, or operation in areas with greater demand.
+- This metric can support driver performance benchmarking and incentive
+  program design.
+*/
+
+/*
+===============================================================================
+D3. TOP FIVE DRIVERS BY TRIP VOLUME IN EACH CITY
+===============================================================================
+
+Question:
+Which are the five drivers with the highest number of trips in each city?
+
+Business Purpose:
+Identify the most active drivers within each city based on completed trip
+volume to support performance evaluation, incentive programs, and operational
+planning.
+===============================================================================
+*/
+
+WITH driver_ranking AS (
+    SELECT
+        l.city,
+        t.driver_id,
+        COUNT(t.trip_id) AS trip_count,
+        DENSE_RANK() OVER (
+            PARTITION BY l.city
+            ORDER BY COUNT(t.trip_id) DESC
+        ) AS driver_rank
+    FROM trips AS t
+    JOIN locations AS l
+        ON t.pickup_location_id = l.location_id
+    WHERE t.status = 'completed'
+    GROUP BY
+        l.city,
+        t.driver_id
+)
+
+SELECT
+    city,
+    driver_id,
+    trip_count,
+    driver_rank
+FROM driver_ranking
+WHERE driver_rank <= 5
+ORDER BY
+    city,
+    driver_rank,
+    trip_count DESC,
+    driver_id;
+
+/*
+Observation:
+
+- Driver 208 leads Chicago with 80 completed trips, while Driver 337 leads
+  Houston with 77 completed trips.
+- Los Angeles has a tie for first place between Drivers 98 and 234, with
+  74 completed trips each.
+- Driver 259 ranks first in New York with 73 completed trips.
+- Several cities return more than five drivers because DENSE_RANK() assigns
+  the same position to drivers with equal trip counts.
+- These results identify the most productive drivers within each market and
+  can support city-level performance benchmarking and incentive decisions.
+*/
+/*
+===============================================================================
+D4. DRIVERS GENERATING REVENUE ABOVE THEIR CITY'S AVERAGE
+===============================================================================
+
+Question:
+Which drivers generate revenue above their city's average?
+
+Business Purpose:
+Identify high-performing drivers whose total revenue exceeds the average
+driver revenue within their city. This analysis supports performance
+evaluation, incentive programs, and best practice identification.
+===============================================================================
+*/
+
+WITH driver_revenue AS (
+    SELECT
+        l.city,
+        t.driver_id,
+        SUM(t.total_fare) AS total_revenue
+    FROM trips AS t
+    JOIN locations AS l
+        ON t.pickup_location_id = l.location_id
+    WHERE t.status = 'completed'
+    GROUP BY
+        l.city,
+        t.driver_id
+),
+
+driver_comparison AS (
+    SELECT
+        city,
+        driver_id,
+        total_revenue,
+        AVG(total_revenue) OVER (
+            PARTITION BY city
+        ) AS city_avg_revenue
+    FROM driver_revenue
+)
+
+SELECT
+    city,
+    driver_id,
+    ROUND(total_revenue, 2) AS total_revenue,
+    ROUND(city_avg_revenue, 2) AS city_avg_revenue
+FROM driver_comparison
+WHERE total_revenue > city_avg_revenue
+ORDER BY
+    city,
+    total_revenue DESC;
+
+/*
+Observation:
+
+- Driver revenue was compared against the average revenue generated by
+  drivers within the same city.
+- Los Angeles records the highest average driver revenue (2,030.95),
+  followed by Houston (2,000.21), Chicago (1,438.49), and New York
+  (1,445.29).
+- Multiple drivers in each city outperform their local average, indicating
+  a group of consistently high-performing drivers rather than a single
+  dominant performer.
+- This analysis helps identify drivers who consistently exceed the expected
+  revenue level in their market and can support targeted incentive and
+  performance recognition programs.
+*/
+/*
+===============================================================================
+D5. DRIVERS IN THE TOP 10% BY REVENUE
+===============================================================================
+
+Question:
+Which drivers belong to the top 10% by revenue?
+
+Business Purpose:
+Identify the highest revenue-generating drivers across the platform to support
+performance recognition, incentive programs, and strategic driver management.
+===============================================================================
+*/
+
+WITH revenue_deciles AS (
+    SELECT
+        t.driver_id,
+        SUM(t.total_fare) AS total_revenue,
+        NTILE(10) OVER (
+            ORDER BY SUM(t.total_fare) DESC
+        ) AS revenue_decile
+    FROM trips AS t
+    WHERE t.status = 'completed'
+    GROUP BY t.driver_id
+)
+
+SELECT
+    driver_id,
+    ROUND(total_revenue, 2) AS total_revenue,
+    revenue_decile
+FROM revenue_deciles
+WHERE revenue_decile = 1
+ORDER BY total_revenue DESC;
+
+/*
+Observation:
+
+- Driver 10 leads the top revenue decile with total revenue of 3,679.84
+  monetary units.
+- Drivers 234, 57, 98, and 303 also rank among the highest revenue
+  contributors, generating more than 3,200 monetary units each.
+- A total of 36 drivers were classified in the first revenue decile,
+  representing approximately the top 10% of drivers by total revenue.
+- This group represents the platform's strongest revenue contributors and
+  may be considered for targeted incentives, recognition programs, and
+  retention strategies.
+*/
+/*
+===============================================================================
+D6. HIGHEST-RATED DRIVER IN EACH CITY
+===============================================================================
+
+Question:
+Which is the highest-rated driver in each city?
+
+Business Purpose:
+Identify the highest-rated drivers in each city to recognize outstanding
+service quality and support performance evaluation and recognition programs.
+===============================================================================
+*/
+
+WITH driver_rating_rank AS (
+    SELECT
+        l.city,
+        d.driver_id,
+        d.rating,
+        DENSE_RANK() OVER (
+            PARTITION BY l.city
+            ORDER BY d.rating DESC
+        ) AS rating_rank
+    FROM drivers AS d
+    JOIN trips AS t
+        ON d.driver_id = t.driver_id
+    JOIN locations AS l
+        ON t.pickup_location_id = l.location_id
+    WHERE t.status = 'completed'
+    GROUP BY
+        l.city,
+        d.driver_id,
+        d.rating
+)
+
+SELECT
+    city,
+    driver_id,
+    rating,
+    rating_rank
+FROM driver_rating_rank
+WHERE rating_rank = 1
+ORDER BY
+    city,
+    driver_id;
+
+/*
+Observation:
+
+- Driver 9 is the highest-rated driver in Chicago with a rating of 4.98.
+- Houston has two drivers tied for the highest rating: Drivers 35 and 178,
+  both with a perfect rating of 5.00.
+- Driver 34 is the highest-rated driver in Los Angeles with a rating of
+  4.97.
+- New York has three drivers tied for the highest rating: Drivers 207, 260,
+  and 298, each with a rating of 4.99.
+- DENSE_RANK() preserves ties, ensuring that all drivers sharing the highest
+  rating within each city are included in the results.
+*/
+/*
+===============================================================================
+D7. MOST EXPENSIVE TRIP COMPLETED BY EACH DRIVER
+===============================================================================
+
+Question:
+What is the most expensive trip completed by each driver?
+
+Business Purpose:
+Identify the highest-value trip completed by each driver to evaluate peak
+revenue performance and recognize exceptional individual trips.
+===============================================================================
+*/
+
+SELECT
+    driver_id,
+    MAX(total_fare) AS most_expensive_trip
+FROM trips
+WHERE status = 'completed'
+GROUP BY driver_id
+ORDER BY most_expensive_trip DESC;
+
+/*
+Observation:
+
+- Driver 24 completed the highest-value trip on the platform, with a fare
+  of 224.27 monetary units.
+- Several other drivers, including Drivers 320, 35, 55, and 30, also
+  completed trips exceeding 200 monetary units.
+- Comparing each driver's most expensive trip helps identify exceptional
+  revenue-generating trips and highlights drivers capable of completing
+  high-value rides.
+*/
+
+/*
+===============================================================================
+D8. DRIVERS WITH AN ABOVE-AVERAGE RATING
+===============================================================================
+
+Question:
+Which drivers have an above-average rating?
+
+Business Purpose:
+Identify drivers whose rating exceeds the platform-wide average to support
+service quality evaluation, recognition programs, and performance management.
+===============================================================================
+*/
+
+SELECT
+    driver_id,
+    rating
+FROM drivers
+WHERE rating > (
+    SELECT AVG(rating)
+    FROM drivers
+)
+ORDER BY rating DESC, driver_id;
+
+/*
+Observation:
+
+- Drivers 35 and 178 have the highest possible rating of 5.00.
+- Drivers 207, 260, 298, and 326 follow closely with ratings of 4.99.
+- The results identify a substantial group of drivers whose ratings exceed
+  the platform-wide average.
+- Above-average ratings indicate comparatively strong service performance
+  and can support recognition, retention, and incentive initiatives.
+- Further analysis should combine ratings with completed trip volume and
+  revenue, since a high rating alone does not fully measure overall driver
+  performance.
+*/
+/*
+===============================================================================
+D9. DRIVER REVENUE COMPARED TO THE CITY AVERAGE
+===============================================================================
+
+Question:
+How does each driver's revenue compare to the average revenue in their city?
+
+Business Purpose:
+Compare each driver's total revenue with the average driver revenue within
+their city to evaluate relative performance and identify top and
+underperforming drivers.
+===============================================================================
+*/
+
+WITH driver_revenue AS (
+    SELECT
+        l.city,
+        t.driver_id,
+        SUM(t.total_fare) AS total_revenue
+    FROM trips AS t
+    JOIN locations AS l
+        ON t.pickup_location_id = l.location_id
+    WHERE t.status = 'completed'
+    GROUP BY
+        l.city,
+        t.driver_id
+)
+
+SELECT
+    city,
+    driver_id,
+    ROUND(total_revenue, 2) AS total_revenue,
+    ROUND(
+        AVG(total_revenue) OVER (
+            PARTITION BY city
+        ),
+        2
+    ) AS city_avg_revenue,
+    ROUND(
+        total_revenue -
+        AVG(total_revenue) OVER (
+            PARTITION BY city
+        ),
+        2
+    ) AS revenue_difference
+FROM driver_revenue
+ORDER BY
+    city,
+    revenue_difference DESC;
+
+/*
+Observation:
+
+- The analysis compares each driver's total revenue with the average
+  revenue generated by drivers operating in the same city.
+- Positive revenue differences indicate drivers who outperform the city
+  average, while negative values identify drivers generating below-average
+  revenue.
+- Houston and Los Angeles contain several drivers with revenue exceeding
+  their city average by more than 1,000 monetary units, highlighting
+  significant performance differences among drivers.
+- This comparison provides a standardized measure of driver performance
+  within each market and supports benchmarking, incentive allocation, and
+  operational decision-making.
+*/
+/*
+===============================================================================
+D10. DRIVERS COMBINING HIGH REVENUE, HIGH TRIP VOLUME, AND EXCELLENT RATINGS
+===============================================================================
+
+Question:
+Which drivers combine high revenue, many completed trips, and excellent ratings?
+
+Business Purpose:
+Identify the platform's top-performing drivers by combining financial
+performance, productivity, and service quality to support incentive
+programs and talent retention.
+===============================================================================
+*/
+
+WITH driver_performance AS (
+    SELECT
+        d.driver_id,
+        d.rating,
+        SUM(t.total_fare) AS total_revenue,
+        COUNT(t.trip_id) AS completed_trips
+    FROM drivers AS d
+    JOIN trips AS t
+        ON d.driver_id = t.driver_id
+    WHERE t.status = 'completed'
+    GROUP BY
+        d.driver_id,
+        d.rating
+)
+
+SELECT
+    driver_id,
+    ROUND(total_revenue, 2) AS total_revenue,
+    completed_trips,
+    rating
+FROM driver_performance
+WHERE total_revenue > (
+        SELECT AVG(total_revenue)
+        FROM driver_performance
+    )
+    AND completed_trips > (
+        SELECT AVG(completed_trips)
+        FROM driver_performance
+    )
+    AND rating >= 4.80
+ORDER BY
+    total_revenue DESC,
+    completed_trips DESC,
+    rating DESC;
+
+/*
+Observation:
+
+- Driver 10 achieved the strongest overall performance, generating the
+  highest revenue (3,679.84), completing 76 trips, and maintaining an
+  excellent rating of 4.97.
+- Drivers 337, 98, 57, 35, and 34 also stand out by simultaneously
+  exceeding the average revenue and trip volume while maintaining
+  outstanding customer ratings.
+- The selected drivers consistently perform well across three key
+  performance dimensions: revenue generation, operational productivity,
+  and service quality.
+- These drivers represent the platform's top overall performers and are
+  strong candidates for incentive programs, recognition initiatives, and
+  retention strategies.
+*/
+
+===============================================================================
+3. OPERATIONAL PERFORMANCE
+===============================================================================
+
+Objective:
+Understand trip demand, operational efficiency, and travel behavior.
+ /*
+===============================================================================
+O1. HOURS WITH THE HIGHEST TRIP DEMAND
+===============================================================================
+
+Question:
+Which hours have the highest trip demand?
+
+Business Purpose:
+Identify peak demand hours to support driver allocation, workforce planning,
+and operational efficiency.
+===============================================================================
+*/
+
+SELECT
+    HOUR(requested_at) AS trip_hour,
+    COUNT(trip_id) AS total_trips
+FROM trips
+GROUP BY
+    trip_hour
+ORDER BY
+    total_trips DESC,
+    trip_hour;
+
+/*
+Observation:
+
+- The highest trip demand occurs at 18:00, with 891 trip requests.
+- Hours 14:00 (889 trips) and 08:00 (870 trips) also experience high
+  demand, indicating multiple demand peaks throughout the day.
+- Trip requests are relatively well distributed across all hours, with no
+  single hour dominating overall demand.
+- The lowest demand is observed at 16:00 (779 trips), followed by 06:00
+  (780 trips) and 12:00 (785 trips).
+- These findings can support dynamic driver allocation and shift planning
+  to better match customer demand patterns.
+*/
+ /*
+===============================================================================
+O2. AVERAGE TRIP DURATION BY CITY
+===============================================================================
+
+Question:
+What is the average trip duration by city?
+
+Business Purpose:
+Measure the average trip duration across cities to understand travel patterns,
+traffic conditions, and operational efficiency.
+===============================================================================
+*/
+
+SELECT
+    l.city,
+    ROUND(AVG(t.duration_mins), 2) AS avg_duration_mins
+FROM trips AS t
+JOIN locations AS l
+    ON t.pickup_location_id = l.location_id
+WHERE t.status = 'completed'
+GROUP BY
+    l.city
+ORDER BY
+    avg_duration_mins DESC;
+
+/*
+Observation:
+
+- Los Angeles has the longest average trip duration at 39.95 minutes,
+  indicating longer travel distances or heavier traffic conditions.
+- Houston ranks second with an average duration of 34.61 minutes.
+- New York and Chicago have shorter average trip durations, at 26.88 and
+  25.52 minutes, respectively.
+- Understanding average trip duration by city can support pricing
+  strategies, driver allocation, and operational planning.
+*/
+/*
+===============================================================================
+O3. ROUTES WITH THE LONGEST AVERAGE DURATION
+===============================================================================
+
+Question:
+Which routes have the longest average duration?
+
+Business Purpose:
+Identify routes with the longest average travel times to support route
+optimization, pricing strategies, and operational planning.
+===============================================================================
+*/
+
+SELECT
+    pickup.zone_name AS pickup_zone,
+    dropoff.zone_name AS dropoff_zone,
+    ROUND(AVG(t.duration_mins), 2) AS avg_duration_mins,
+    COUNT(t.trip_id) AS trip_count
+FROM trips AS t
+JOIN locations AS pickup
+    ON t.pickup_location_id = pickup.location_id
+JOIN locations AS dropoff
+    ON t.dropoff_location_id = dropoff.location_id
+WHERE t.status = 'completed'
+GROUP BY
+    pickup.zone_name,
+    dropoff.zone_name
+HAVING COUNT(t.trip_id) >= 5
+ORDER BY
+    avg_duration_mins DESC,
+    trip_count DESC;
+
+/*
+Observation:
+
+- The route from Burbank to Compton has the longest average trip duration,
+  averaging 75.86 minutes across 37 completed trips.
+- Several routes connecting Pasadena, Santa Monica, Venice Beach, and
+  Compton also exceed 60 minutes on average, indicating consistently long
+  travel times within the Los Angeles area.
+- In Houston, routes between Sugar Land, The Heights, and Downtown Houston
+  also exhibit relatively long average durations.
+- These findings can support route optimization, dynamic pricing, and
+  strategic driver allocation in areas with consistently long trips.
+*/
+/*
+===============================================================================
+O4. ZONES WITH HIGH DEMAND BUT FEW ACTIVE DRIVERS
+===============================================================================
+
+Question:
+Which zones have high demand but relatively few active drivers?
+
+Business Purpose:
+Identify zones where trip demand exceeds driver availability to support
+driver allocation, demand balancing, and operational efficiency.
+===============================================================================
+*/
+
+WITH zone_metrics AS (
+    SELECT
+        l.city,
+        l.zone_name,
+        COUNT(t.trip_id) AS trip_count,
+        COUNT(DISTINCT t.driver_id) AS active_drivers
+    FROM trips AS t
+    JOIN locations AS l
+        ON t.pickup_location_id = l.location_id
+    WHERE t.status = 'completed'
+    GROUP BY
+        l.city,
+        l.zone_name
+)
+
+SELECT
+    city,
+    zone_name,
+    trip_count,
+    active_drivers
+FROM zone_metrics
+WHERE trip_count > (
+        SELECT AVG(trip_count)
+        FROM zone_metrics
+    )
+    AND active_drivers < (
+        SELECT AVG(active_drivers)
+        FROM zone_metrics
+    )
+ORDER BY
+    trip_count DESC,
+    active_drivers ASC;
+
+/*
+Observation:
+
+- Navy Pier (Chicago) is the only zone that combines above-average trip
+  demand with below-average driver availability.
+- The zone recorded 421 completed trips served by only 81 active drivers,
+  suggesting a potential imbalance between demand and driver supply.
+- Increasing driver availability in this zone could reduce passenger
+  waiting times, improve service levels, and better match operational
+  capacity with customer demand.
+*/
+/*
+===============================================================================
+O5. TRIPS WITH UNUSUALLY HIGH DURATION OR DISTANCE
+===============================================================================
+
+Question:
+Which trips present unusually high duration or distance?
+
+Business Purpose:
+Identify trips with exceptionally high duration or distance that may indicate
+traffic congestion, inefficient routes, or unusual travel patterns.
+===============================================================================
+*/
+
+WITH trip_statistics AS (
+    SELECT
+        AVG(duration_mins) AS avg_duration,
+        STDDEV(duration_mins) AS std_duration,
+        AVG(distance_km) AS avg_distance,
+        STDDEV(distance_km) AS std_distance
+    FROM trips
+    WHERE status = 'completed'
+)
+
+SELECT
+    t.trip_id,
+    t.driver_id,
+    ROUND(t.distance_km, 2) AS distance_km,
+    t.duration_mins,
+    ROUND(s.avg_distance + (2 * s.std_distance), 2) AS distance_threshold,
+    ROUND(s.avg_duration + (2 * s.std_duration), 2) AS duration_threshold
+FROM trips AS t
+CROSS JOIN trip_statistics AS s
+WHERE t.status = 'completed'
+AND (
+        t.distance_km > (s.avg_distance + (2 * s.std_distance))
+     OR t.duration_mins > (s.avg_duration + (2 * s.std_duration))
+)
+ORDER BY
+    duration_mins DESC,
+    distance_km DESC;
+
+/*
+Observation:
+
+- Trips exceeding 71.75 minutes or 40.77 kilometers were classified as
+  unusually long using a statistical threshold of mean plus two standard
+  deviations.
+- Several trips exceeded both thresholds simultaneously, indicating
+  exceptionally long journeys in terms of both travel time and distance.
+- The most extreme trip reached 153 minutes, more than twice the duration
+  threshold, while multiple trips reached the maximum recorded distance of
+  50 kilometers.
+- Detecting these outliers can help identify unusual travel patterns,
+  traffic congestion, pricing anomalies, or potential data quality issues
+  requiring further investigation.
+*/
