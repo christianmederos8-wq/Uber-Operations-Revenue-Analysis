@@ -111,28 +111,21 @@ Business Recommendations
 
 ---
 
-# 📈 Current Progress
+# ✅ Project Completion
 
-### ✅ Completed
+The end-to-end analytics workflow has been completed, including:
 
 - Data Quality Assessment
 - Exploratory Data Analysis (EDA)
-- Financial Performance KPIs
-
-### 🚧 Currently in Progress
-
+- KPI Development
+- Financial Performance Analysis
 - Driver Performance Analysis
-
-### ⏳ Upcoming
-
-- Operational Performance
+- Operational Performance Analysis
 - Cancellation Analysis
-- Rider Behavior
-- Service Quality
-- Power BI Dashboard
-- Business Recommendations
-
----
+- Rider Behavior Analysis
+- Service Quality Analysis
+- Power BI Dashboard Development
+- Business Recommendations---
 
 # 📌 Business Questions
 
@@ -165,36 +158,42 @@ Uber-Operations-Revenue-Analysis/
 ├── sql/
 │   ├── 01_data_quality.sql
 │   ├── 02_eda.sql
-│   └── 03_kpis.sql
+│   ├── 03_kpis.sql
+│   └── 04_dashboard_queries.sql
 │
 ├── powerbi/
-│   └── Uber_Dashboard.pbix
-│
-├── images/
-│   ├── dashboard.png
-│   ├── erd.png
-│   └── charts/
+│   └── Uber_Operations_Revenue_Analysis.pbix
 │
 ├── docs/
 │   ├── business_questions.md
-│   ├── data_dictionary.pdf
-│   └── executive_report.pdf
+│   ├── data_dictionary.md
+│   ├── database_schema.md
+│   └── screenshots/
+│       ├── Page 1.PNG
+│       ├── Page 2.PNG
+│       ├── Page 3.PNG
+│       └── Page 4.PNG
 │
-└── LICENSE
+└── images/
 ```
 
 ---
 
 # 📊 Analysis Roadmap
 
-| Phase | Status |
-|---------|:------:|
-| Data Quality Assessment | ✅ |
-| Exploratory Data Analysis | ✅ |
-| KPI Development | 🟡 In Progress |
-| Dashboard Development | ⬜ |
-| Business Recommendations | ⬜ |
-
+| Phase                     | Status |
+| ------------------------- | :----: |
+| Data Quality Assessment   |   ✅   |
+| Exploratory Data Analysis |   ✅   |
+| KPI Development           |   ✅   |
+| Financial Analysis        |   ✅   |
+| Driver Analysis           |   ✅   |
+| Operational Analysis      |   ✅   |
+| Cancellation Analysis     |   ✅   |
+| Rider Analysis            |   ✅   |
+| Service Quality Analysis  |   ✅   |
+| Dashboard Development     |   ✅   |
+| Business Recommendations  |   ✅   |
 ---
 # 📈 Dashboard Preview
 
@@ -214,32 +213,43 @@ Uber-Operations-Revenue-Analysis/
 
 ![Rider Analysis](docs/screenshots/Page%204.PNG)
 
-# 💡 Preliminary Findings
+# 💡 Key Findings
 
-Current analysis indicates:
+The analysis identified several important business insights:
 
-- Houston generates the highest total revenue.
+- Houston generates the highest total revenue among the analyzed cities.
 - Los Angeles records the highest average fare.
-- Airport pickup zones generate a significant share of total revenue.
-- Flushing is the busiest pickup zone.
-- Payment methods are distributed almost evenly across the platform.
-
+- Airport-related pickup zones contribute significantly to revenue generation.
+- Flushing is one of the busiest pickup zones by trip volume.
+- Payment methods are distributed relatively evenly across card, wallet, and cash.
+- Cancellation rates vary by city and are influenced by operational conditions.
+- Driver performance shows meaningful variation in both revenue generation and ratings.
+- A small group of riders contributes disproportionately to total rider revenue.
 ---
 
 # 📌 Business Recommendations
 
-Business recommendations will be added after completing the dashboard and the full KPI analysis.
+Based on the analysis, the following actions are recommended:
 
+- Prioritize operational and marketing efforts in high-revenue cities such as Houston and Los Angeles.
+- Strengthen driver availability during peak demand hours to reduce unmet demand and improve service levels.
+- Monitor cities and operational conditions with higher cancellation rates to identify preventable causes.
+- Focus on high-demand pickup zones, especially airport and central urban areas, when allocating driver supply.
+- Develop retention strategies for high-value riders who contribute a disproportionate share of revenue.
+- Track driver revenue and ratings together to identify high-performing drivers and potential service quality issues.
+- Maintain multiple payment options, as card, wallet, and cash usage is relatively balanced across the platform.
 ---
 
 # 🚀 How to Run
 
-1. Import the database into MySQL.
+1. Import or restore the Uber database in MySQL.
 2. Execute the SQL scripts located in the **sql/** folder.
-3. Open the Power BI file located in **powerbi/**.
-4. Refresh the data model.
-5. Explore the interactive dashboard.
-
+3. Export the dashboard query results to CSV files.
+4. Place the exported CSV files in the appropriate **data/** folder.
+5. Open `Uber_Operations_Revenue_Analysis.pbix` from the **powerbi/** folder.
+6. Update the data source paths if necessary.
+7. Refresh the Power BI data model.
+8. Explore the interactive dashboard pages.
 ---
 
 # 👨‍💻 Author
@@ -253,38 +263,38 @@ Industrial Engineer | Data Analyst
 ### Skills Demonstrated
 
 - SQL
+- MySQL
 - Data Cleaning
+- Data Quality Assessment
 - Exploratory Data Analysis (EDA)
-- Business Intelligence
 - KPI Development
+- Business Analysis
 - Window Functions
 - Common Table Expressions (CTEs)
-- Data Visualization
 - Power BI
+- Data Visualization
 - Excel
-
-GitHub: *(Coming Soon)*
-
-LinkedIn: *(Coming Soon)*
+- Git
+- GitHub
 
 ---
 
 # ⭐ Project Status
 
-🚧 **In Progress**
+✅ **Completed**
 
-**Current completion:** ~45%
+This project is part of my professional Data Analytics portfolio and demonstrates an end-to-end analytics workflow using SQL, Power BI, Excel, Git, and GitHub.
 
-### Completed
+The completed project includes:
 
-- ✅ Data Quality Assessment
-- ✅ Exploratory Data Analysis
-- ✅ Financial Performance KPIs
-
-### Next Milestone
-
+- Data Quality Assessment
+- Exploratory Data Analysis
+- KPI Development
+- Financial Performance Analysis
 - Driver Performance Analysis
-
-🚧 **In Progress**
-
-This repository is being developed as part of my professional Data Analytics portfolio. New analyses, dashboards, and documentation will be added progressively.
+- Operational Performance Analysis
+- Cancellation Analysis
+- Rider Behavior Analysis
+- Service Quality Analysis
+- Interactive Power BI Dashboard
+- Business Recommendations
