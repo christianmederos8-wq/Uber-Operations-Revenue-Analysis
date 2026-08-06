@@ -200,20 +200,19 @@ Uber-Operations-Revenue-Analysis/
 
 ## Executive Overview
 
-![Executive Overview](docs/screenshots/Page%201.png)
+![Executive Overview](docs/screenshots/Page%201.PNG)
 
 ## Driver Analysis
 
-![Driver Analysis](docs/screenshots/Page%202.png)
+![Driver Analysis](docs/screenshots/Page%202.PNG)
 
 ## Operational Analysis
 
-![Operational Analysis](docs/screenshots/Page%203.png)
+![Operational Analysis](docs/screenshots/Page%203.PNG)
 
 ## Rider Analysis
 
-![Rider Analysis](docs/screenshots/Page%204.png)
----
+![Rider Analysis](docs/screenshots/Page%204.PNG)
 
 # 💡 Preliminary Findings
 
