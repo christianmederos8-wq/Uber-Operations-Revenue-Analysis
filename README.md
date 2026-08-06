@@ -196,15 +196,11 @@ Uber-Operations-Revenue-Analysis/
 | Business Recommendations | ⬜ |
 
 ---
-
 # 📈 Dashboard Preview
 
-> *(Dashboard screenshots will be added after Power BI development.)*
+## Executive Overview
 
-<p align="center">
-<img src="images/dashboard.png" width="900">
-</p>
-
+![Executive Overview](docs/screenshots/executive_overview.png)
 ---
 
 # 💡 Preliminary Findings
